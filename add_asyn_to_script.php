@@ -30,3 +30,40 @@ function add_async_to_script( $tag, $handle, $src ) {
 
 	return $tag;
 }
+
+
+// Enqueue Styles and js Deffer and Async
+function add_defer_attribute($tag, $handle) {
+    // add script handles to the array below
+    $scripts_to_defer = array('my-js-handle', 'another-handle');
+
+    foreach ($scripts_to_defer as $defer_script) {
+        if ($defer_script === $handle) {
+            return str_replace(' src', ' defer="defer" src', $tag);
+        }
+    }
+    return $tag;
+}
+
+add_filter('script_loader_tag', 'add_defer_attribute', 10, 2);
+if (!is_admin()) {
+
+    function add_asyncdefer_attribute($tag, $handle) {
+        // if the unique handle/name of the registered script has 'async' in it
+        if (strpos($handle, 'async') !== false) {
+            // return the tag with the async attribute
+            return str_replace('<script ', '<script async ', $tag);
+        }
+        // if the unique handle/name of the registered script has 'defer' in it
+        else if (strpos($handle, 'defer') !== false) {
+            // return the tag with the defer attribute
+            return str_replace('<script ', '<script defer ', $tag);
+        }
+        // otherwise skip
+        else {
+            return $tag;
+        }
+    }
+
+    add_filter('script_loader_tag', 'add_asyncdefer_attribute', 10, 2);
+}
